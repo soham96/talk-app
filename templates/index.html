@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+
+<head>
+    <title>Talk Proposal Generator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="my-4 text-center">Talk Proposal Generator</h1>
+                <p class="lead text-center">Generate engaging and effective talk proposals for your next conference!</p>
+                <p class="text-center">Our tool uses AI to help you create professional proposals based on your inputs.
+                </p>
+                <img src="https://img.freepik.com/premium-vector/happy-smile-emotclip-art-with-talk-speech-bubble-vector-clip-art-illustration_138676-100.jpg"
+                    class="img-fluid rounded-circle mx-auto d-block" style="max-width: 200px;">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                {% if proposal %}
+                <div class="my-4">
+                    <h2>Your Proposal:</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <pre>{{ proposal }}</pre>
+                        </div>
+                    </div>
+                    <form class="mt-3" method="POST" action="/feedback">
+                        <label>Was this proposal helpful?</label><br />
+                        <input type="radio" id="thumbs_up" name="rating" value="thumbs_up">
+                        <label for="thumbs_up">👍</label><br>
+                        <input type="radio" id="thumbs_down" name="rating" value="thumbs_down">
+                        <label for="thumbs_down">👎</label><br>
+                        <label for="feedback">Additional Feedback:</label><br>
+                        <textarea id="feedback" name="feedback" rows="4" cols="50"></textarea>
+                        <input type="submit" value="Submit Feedback">
+                    </form>
+                    {% if relevant_talks %}
+                    <div class="my-4">
+                        <h2>Relevant Talks from Previous Conferences:</h2>
+                        <ul>
+                            {% for talk in relevant_talks %}
+                            <li>{{ talk }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <button class="btn btn-secondary mt-3 regenerate-button" onclick="location.reload();">Regenerate
+                        Proposal</button>
+                    <button class="btn btn-primary mt-3" onclick="window.location.href='/'">Back</button>
+                </div>
+                {% else %}
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Type of Talk</label>
+                        <select class="form-control" name="talk_type">
+                            <option value="talk">Talk (30 mins)</option>
+                            <option value="workshop">Workshop (60 mins)</option>
+                            <option value="lightning_talk">Lightning Talk (10 mins)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Ideas</label>
+                        <textarea class="form-control" name="idea" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Conference</label>
+                        <select class="form-control" name="conference">
+                            <option value="pycon_us">PyCon US</option>
+                            <option value="pycon_au">PyCon AU</option>
+                            <option value="scipy">SciPy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Level of Talk</label>
+                        <select class="form-control" name="talk_level">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" class="form-control" name="year">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Proposal</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <div id="loading-screen">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p id="loading-message">Hold on, we're taking all your ingredients and cooking up the proposal...</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script>
+        var messages = [
+            "Hold on, we're taking all your ingredients and cooking up the proposal...",
+            "We're putting on our thinking caps, wait for us...",
+            "Patience is a virtue, and we're making sure your proposal is virtuous...",
+            "We're brewing a potent mix of words and ideas for your proposal...",
+            "Don't worry, good things come to those who wait...",
+            "We're making sure your proposal is a perfect fit for the conference...",
+            "We're tailoring your proposal to match the conference requirements...",
+            "Just a moment more, we're adding the final touches...",
+            "We're making sure your proposal stands out...",
+            "Just a little longer, your proposal will be worth the wait..."
+        ];
+
+        $(document).ready(function () {
+            $('#loading-screen').hide();
+        });
+
+        $(document).ready(function () {
+            $('form').on('submit', function () {
+                $('#loading-screen').show();
+                cycleLoadingMessage();
+            });
+            $('.regenerate-button').on('click', function () {
+                $('#loading-screen').show();
+                cycleLoadingMessage();
+            });
+        });
+
+        function cycleLoadingMessage() {
+            var i = 0;
+            setInterval(function () {
+                $('#loading-message').text(messages[i]);
+                i = (i + 1) % messages.length;
+            }, 3000);
+        }
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function () {
+                $('#loading-screen').show();
+                cycleLoadingMessage();
+            });
+            $('.regenerate-button').on('click', function () {
+                $('#loading-screen').show();
+                cycleLoadingMessage();
+            });
+        });
+
+        function cycleLoadingMessage() {
+            var i = 0;
+            setInterval(function () {
+                $('#loading-message').text(messages[i]);
+                i = (i + 1) % messages.length;
+            }, 3000);
+        }
+    </script>
